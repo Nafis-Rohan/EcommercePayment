@@ -1,0 +1,4 @@
+body { font-family: sans-serif; max-width: 800px; margin: 20px auto; padding: 0 15px; }
+nav a { margin-right: 12px; }
+.card { border: 1px solid #ccc; padding: 8px; margin: 8px 0; }
+input, button { padding: 6px; margin: 4px 0; }

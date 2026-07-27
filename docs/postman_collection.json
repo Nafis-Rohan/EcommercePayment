@@ -1,0 +1,425 @@
+{
+  "info": {
+    "_postman_id": "8f3b6b2a-1e4d-4b1a-9a2a-ecommerce-payment-api",
+    "name": "E-commerce Ordering & Payment System API",
+    "description": "Full API reference for the Django/DRF backend: users/auth, products/categories, orders, payments (Stripe + bKash). Run requests top-to-bottom within a folder — auth, product, order, and payment IDs auto-save into collection variables via each request's Tests script.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8000", "type": "string" },
+    { "key": "access_token", "value": "", "type": "string" },
+    { "key": "refresh_token", "value": "", "type": "string" },
+    { "key": "admin_access_token", "value": "", "type": "string" },
+    { "key": "category_id", "value": "", "type": "string" },
+    { "key": "product_id", "value": "", "type": "string" },
+    { "key": "order_id", "value": "", "type": "string" },
+    { "key": "payment_id", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Users & Auth",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data.access) { pm.collectionVariables.set('access_token', data.access); }",
+                  "if (data.refresh) { pm.collectionVariables.set('refresh_token', data.refresh); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"email\": \"buyer1@example.com\",\n  \"username\": \"buyer1\",\n  \"password\": \"testpass123\",\n  \"password_confirm\": \"testpass123\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/users/register/", "host": ["{{base_url}}"], "path": ["api", "users", "register", ""] },
+            "description": "Returns { user, access, refresh } — registering logs you in immediately, no separate Login call needed. access_token/refresh_token are auto-saved by this request's Tests script."
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data.access) { pm.collectionVariables.set('access_token', data.access); }",
+                  "if (data.refresh) { pm.collectionVariables.set('refresh_token', data.refresh); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"email\": \"buyer1@example.com\",\n  \"password\": \"testpass123\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/users/login/", "host": ["{{base_url}}"], "path": ["api", "users", "login", ""] }
+          }
+        },
+        {
+          "name": "Login as Admin (seeded)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data.access) { pm.collectionVariables.set('admin_access_token', data.access); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"admin12345\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/users/login/", "host": ["{{base_url}}"], "path": ["api", "users", "login", ""] },
+            "description": "Uses the account created by `python manage.py seed_admin`. Saved separately as `admin_access_token` so you can still use the regular `access_token` (buyer) for order/payment requests."
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data.access) { pm.collectionVariables.set('access_token', data.access); }",
+                  "if (data.refresh) { pm.collectionVariables.set('refresh_token', data.refresh); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"refresh\": \"{{refresh_token}}\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/users/login/refresh/", "host": ["{{base_url}}"], "path": ["api", "users", "login", "refresh", ""] },
+            "description": "ROTATE_REFRESH_TOKENS is on, so this also returns a new refresh token (saved automatically) — the old refresh token becomes invalid after this call."
+          }
+        },
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": { "raw": "{{base_url}}/api/users/me/", "host": ["{{base_url}}"], "path": ["api", "users", "me", ""] }
+          }
+        },
+        {
+          "name": "Update My Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"first_name\": \"John\",\n  \"last_name\": \"Doe\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/users/me/", "host": ["{{base_url}}"], "path": ["api", "users", "me", ""] },
+            "description": "email/username are read-only here — only first_name/last_name are editable."
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"refresh\": \"{{refresh_token}}\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/users/logout/", "host": ["{{base_url}}"], "path": ["api", "users", "logout", ""] },
+            "description": "Blacklists the refresh token. Re-using it afterward on Refresh Token will fail with 401."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products & Categories",
+      "item": [
+        {
+          "name": "List Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/products/", "host": ["{{base_url}}"], "path": ["api", "products", ""] },
+            "description": "Public — no auth required."
+          }
+        },
+        {
+          "name": "Get Category Tree",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/products/categories/tree/", "host": ["{{base_url}}"], "path": ["api", "products", "categories", "tree", ""] },
+            "description": "Public. Cached in Redis for 1 hour. There is no API endpoint to create categories — use Django admin (`{{base_url}}/admin/`, login admin@example.com / admin12345) or `python manage.py seed_products`. Copy an `id` from this response into the `category_id` collection variable to use in 'Create Product' below."
+          }
+        },
+        {
+          "name": "Create Product (Admin only)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data.id) { pm.collectionVariables.set('product_id', data.id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_access_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"category\": \"{{category_id}}\",\n  \"name\": \"Wireless Mouse\",\n  \"sku\": \"WM-100\",\n  \"description\": \"Ergonomic wireless mouse\",\n  \"price\": \"25.00\",\n  \"stock\": 50,\n  \"status\": \"active\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/products/", "host": ["{{base_url}}"], "path": ["api", "products", ""] },
+            "description": "Requires an admin (is_staff) token — use 'Login as Admin' first. `category` must be a real Category id (see 'Get Category Tree')."
+          }
+        },
+        {
+          "name": "Get Product Detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/products/{{product_id}}/", "host": ["{{base_url}}"], "path": ["api", "products", "{{product_id}}", ""] },
+            "description": "Public."
+          }
+        },
+        {
+          "name": "Update Product (Admin only)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_access_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"price\": \"22.50\",\n  \"stock\": 45\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/products/{{product_id}}/", "host": ["{{base_url}}"], "path": ["api", "products", "{{product_id}}", ""] }
+          }
+        },
+        {
+          "name": "Get Product Recommendations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/products/{{product_id}}/recommendations/", "host": ["{{base_url}}"], "path": ["api", "products", "{{product_id}}", "recommendations", ""] },
+            "description": "Public. Returns other products in the same category subtree (DFS over the cached category tree)."
+          }
+        },
+        {
+          "name": "Delete Product (Admin only)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_access_token}}" }],
+            "url": { "raw": "{{base_url}}/api/products/{{product_id}}/", "host": ["{{base_url}}"], "path": ["api", "products", "{{product_id}}", ""] },
+            "description": "Run this last — it deletes the product you just created/tested with, so run it after the Orders/Payments folders if you're using this same product_id there."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "Create Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data.id) { pm.collectionVariables.set('order_id', data.id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"items\": [\n    { \"product_id\": \"{{product_id}}\", \"quantity\": 2 }\n  ]\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/orders/", "host": ["{{base_url}}"], "path": ["api", "orders", ""] },
+            "description": "user_id is never sent — the order is created for whoever the access_token belongs to. total_amount is computed server-side (quantity x price), never trusted from the client. Stock is NOT reduced yet — only after a successful payment."
+          }
+        },
+        {
+          "name": "List My Orders",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": { "raw": "{{base_url}}/api/orders/", "host": ["{{base_url}}"], "path": ["api", "orders", ""] },
+            "description": "Scoped to the authenticated user (staff/admin tokens see every order)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Checkout — Stripe",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data.payment_id) { pm.collectionVariables.set('payment_id', data.payment_id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"order_id\": \"{{order_id}}\",\n  \"provider\": \"stripe\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/payments/checkout/", "host": ["{{base_url}}"], "path": ["api", "payments", "checkout", ""] },
+            "description": "Returns a Stripe `client_secret` — complete the PaymentIntent client-side (or via Stripe's test tools), then Stripe calls your webhook, which marks the payment/order paid and reduces stock. order_id must belong to the authenticated user (others' orders 404)."
+          }
+        },
+        {
+          "name": "Checkout — bKash",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data.payment_id) { pm.collectionVariables.set('payment_id', data.payment_id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"order_id\": \"{{order_id}}\",\n  \"provider\": \"bkash\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/payments/checkout/", "host": ["{{base_url}}"], "path": ["api", "payments", "checkout", ""] },
+            "description": "Returns a bkash_url — open it to complete the sandbox payment, which redirects to the callback endpoint below and marks the payment/order paid + reduces stock. IMPORTANT: call this endpoint through your ngrok URL (not localhost) if you want bKash's sandbox servers to be able to reach the callback."
+          }
+        },
+        {
+          "name": "List My Payments",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": { "raw": "{{base_url}}/api/payments/", "host": ["{{base_url}}"], "path": ["api", "payments", ""] },
+            "description": "Scoped to the authenticated user (staff/admin tokens see every payment)."
+          }
+        },
+        {
+          "name": "Get Payment Detail",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": { "raw": "{{base_url}}/api/payments/{{payment_id}}/", "host": ["{{base_url}}"], "path": ["api", "payments", "{{payment_id}}", ""] }
+          }
+        },
+        {
+          "name": "Stripe Webhook (reference only — Stripe calls this, not Postman)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Stripe-Signature", "value": "t=timestamp,v1=signature" }
+            ],
+            "body": {
+              "mode": "raw",
+              "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"type\": \"payment_intent.succeeded\",\n  \"data\": {\n    \"object\": {\n      \"id\": \"pi_xxx\",\n      \"status\": \"succeeded\"\n    }\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/payments/webhook/stripe/", "host": ["{{base_url}}"], "path": ["api", "payments", "webhook", "stripe", ""] },
+            "description": "Signature-verified — Stripe's servers sign this payload with STRIPE_WEBHOOK_SECRET, so sending it manually from Postman will fail with 400 (invalid signature) unless you compute a real HMAC signature. Included here to document the payload shape. Real end-to-end testing: register this URL (behind your ngrok tunnel) in the Stripe Dashboard and let Stripe call it for real, as already verified."
+          }
+        },
+        {
+          "name": "bKash Callback (reference — bKash redirects here after sandbox payment)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/payments/bkash/callback/?paymentID=bkash_txn_id&status=success",
+              "host": ["{{base_url}}"],
+              "path": ["api", "payments", "bkash", "callback", ""],
+              "query": [
+                { "key": "paymentID", "value": "bkash_txn_id" },
+                { "key": "status", "value": "success" }
+              ]
+            },
+            "description": "Normally reached via redirect from bKash's sandbox checkout page after Checkout — bKash, not called directly. paymentID must match a real Payment.transaction_id created by a prior bKash checkout."
+          }
+        }
+      ]
+    }
+  ]
+}

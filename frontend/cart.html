@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Cart</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+  <nav id="nav"></nav>
+  <h1>Cart</h1>
+  <div id="cart-items"></div>
+  <p>Total (estimated — server recalculates for real): $<span id="cart-total">0</span></p>
+  <button id="place-order-btn">Place Order</button>
+
+  <div id="order-section" style="display:none;">
+    <h2>Order #<span id="order-id"></span> — pay now</h2>
+    <button id="pay-stripe-btn">Pay with Stripe</button>
+    <button id="pay-bkash-btn">Pay with bKash</button>
+
+    <div id="stripe-section" style="display:none;">
+      <div id="card-element"></div>
+      <button id="confirm-stripe-btn">Confirm Payment</button>
+      <p id="stripe-message"></p>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/payments.js"></script>
+</body>
+</html>

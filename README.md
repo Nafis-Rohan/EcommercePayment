@@ -27,7 +27,7 @@ A small plain HTML/CSS/JS frontend is included and deployed at:
 Feature-based app layout — each domain (`users`, `products`, `orders`, `payments`) is
 self-contained with its own models, serializers, views, services, and tests.
 
-![Architecture Diagram](docs/architectureInfo/Architecture.png)
+![Architecture Diagram](docs/architectureInfo/ArchiDiagram.svg)
 
 ```
 config/            Django project: settings, root urls
@@ -127,6 +127,7 @@ silently overselling.
 ## 6. Setting up the payment providers
 
 **Stripe** (test mode):
+
 1. Create a free Stripe account, grab your **secret key** (`sk_test_...`) from
    Developers → API keys.
 2. Add a webhook destination pointing at `<your-public-url>/api/payments/webhook/stripe/`
@@ -138,6 +139,7 @@ silently overselling.
    CLI works well: `stripe payment_intents confirm pi_... --payment-method=pm_card_visa`.
 
 **bKash** (sandbox):
+
 1. Get sandbox credentials from bKash's developer portal — `BKASH_APP_KEY`,
    `BKASH_APP_SECRET`, `BKASH_USERNAME`, `BKASH_PASSWORD`.
 2. `BKASH_BASE_URL` must be the **API** domain
@@ -158,17 +160,17 @@ is already running does nothing — Django (and Docker) only read it once, at pr
 start. I hit this repeatedly early on: I'd fix a key, restart my terminal, and the old
 value would still be in effect. The deeper trap turned out to be **`docker-compose
 restart` vs `docker-compose up -d --force-recreate`** — a plain restart just restarts
-the process inside the *same* container, whose environment was already baked in when
+the process inside the _same_ container, whose environment was already baked in when
 the container was first created via `env_file`. Only a full recreate actually re-reads
 `.env`. Cost me a fair bit of "why isn't my fix working" time until I found the
 distinction.
 
 **A genuinely confusing one: an orphaned `runserver` process.** After fixing an env
-value, requests *still* failed with the old error — even though a fresh terminal
+value, requests _still_ failed with the old error — even though a fresh terminal
 confirmed Django had the right key. Turned out an earlier `runserver` process hadn't
 actually died; it was still bound to port 8000 in the background with the stale
 environment, while the terminal I was watching was a completely different, unused
-process. Found it by checking which PID was *actually* bound to the port
+process. Found it by checking which PID was _actually_ bound to the port
 (`Get-NetTCPConnection -LocalPort 8000`) rather than trusting which terminal I assumed
 was serving requests.
 
@@ -183,12 +185,12 @@ First mistake was pointing `BKASH_BASE_URL` at the customer-facing checkout doma
 instead of the actual API domain — got a misleading "invalid credentials" error that
 had nothing to do with the credentials. Second, a copy-paste slip left the key name
 duplicated inside its own value in `.env`. After fixing both, I still hit inconsistent
-results from bKash's *sandbox itself* — clean failures on their own documented
+results from bKash's _sandbox itself_ — clean failures on their own documented
 "success" test wallets, and even raw HTTP errors (401/403) on calls that had worked
 moments earlier. I confirmed this wasn't my integration by cross-checking against
 Stripe (architecturally identical, worked reliably every time) and by writing a
 mocked test that proves the success path is handled correctly whenever bKash
-*does* return success — the sandbox's shared, publicly-used credentials being flaky
+_does_ return success — the sandbox's shared, publicly-used credentials being flaky
 is a known, external limitation, not a code bug.
 
 **Crashes instead of clean failures.** My first pass at error handling only expected
@@ -197,7 +199,7 @@ account for a provider call failing outright (a `403`, a dropped connection, a
 timeout). A couple of real bKash sandbox errors exposed this as an actual unhandled
 exception crashing the request instead of returning a clean error. Fixed by wrapping
 every provider call in both `initiate()` and the confirm/webhook paths, catching the
-broad `requests.RequestException` (covers bad status codes *and* connection/timeout
+broad `requests.RequestException` (covers bad status codes _and_ connection/timeout
 failures) and Stripe's own `stripe.error.StripeError`, and consistently marking the
 payment `failed` + the order `cancelled` either way through one shared helper.
 
@@ -228,7 +230,9 @@ docker exec ecommerce_backend python manage.py seed_products
 ```
 
 Backend is now running at `http://localhost:8000`. A Postman collection is included
-at `docs/postman_collection.json` for exercising every endpoint directly.
+at `docs/postman_collection.json` for exercising every endpoint directly, and the
+published, browsable version is here:
+**https://documenter.getpostman.com/view/47893159/2sBY4SLJMb**
 
 ## 9. Exposing it publicly with ngrok
 
@@ -270,6 +274,7 @@ python -m http.server 5500
 
 Then open `http://localhost:5500/index.html`. Before it'll actually talk to your
 backend, update `frontend/js/config.js`:
+
 - `API_BASE_URL` → your backend's public URL (ngrok, or wherever it's deployed) + `/api`
 - `STRIPE_PUBLISHABLE_KEY` → your Stripe **publishable** key (`pk_test_...`, safe to
   expose client-side — never the secret key)

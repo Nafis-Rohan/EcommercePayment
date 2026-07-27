@@ -5,7 +5,7 @@ if (registerForm) {
     const form = new FormData(e.target);
     const res = await fetch(API_BASE_URL + '/users/register/', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
       body: JSON.stringify({
         email: form.get('email'),
         username: form.get('username'),
@@ -30,7 +30,7 @@ if (loginForm) {
     const form = new FormData(e.target);
     const res = await fetch(API_BASE_URL + '/users/login/', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
       body: JSON.stringify({
         email: form.get('email'),
         password: form.get('password'),

@@ -17,7 +17,7 @@ async function tryRefreshToken() {
   try {
     const res = await fetch(API_BASE_URL + '/users/login/refresh/', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
       body: JSON.stringify({ refresh: getRefreshToken() }),
     });
     if (!res.ok) { clearTokens(); return false; }
@@ -35,6 +35,9 @@ async function apiFetch(path, options = {}) {
   if (!(options.body instanceof FormData)) {
     options.headers['Content-Type'] = 'application/json';
   }
+  // Bypasses ngrok's free-tier "are you sure?" interstitial page, which otherwise
+  // replaces the real JSON response for any request that looks like it's from a browser.
+  options.headers['ngrok-skip-browser-warning'] = 'true';
   const token = getAccessToken();
   if (token) options.headers['Authorization'] = 'Bearer ' + token;
 

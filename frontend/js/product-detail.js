@@ -20,6 +20,10 @@ async function loadRecommendations() {
 }
 
 document.getElementById('add-to-cart').addEventListener('click', () => {
+  if (!getAccessToken()) {
+    window.location.href = 'login.html';
+    return;
+  }
   const qty = parseInt(document.getElementById('qty').value, 10) || 1;
   addToCart(productId, qty);
   alert('Added to cart');

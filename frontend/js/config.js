@@ -1,6 +1,7 @@
 // Backend API base URL. Point this at your ngrok URL (or deployed backend URL) once
 // the frontend is deployed to Vercel, since "localhost" won't be reachable from there.
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = 'https://detonator-folk-claw.ngrok-free.dev/api'
+
 
 // TODO: paste your real Stripe PUBLISHABLE key here (pk_test_..., NOT the secret key).
 // Find it in the Stripe Dashboard -> Developers -> API keys. Safe to expose client-side.

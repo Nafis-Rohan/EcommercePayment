@@ -108,6 +108,13 @@ CACHES = {
 
 CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=[])
 
+# Adds the custom header the frontend sends to bypass ngrok's free-tier browser-warning
+# interstitial (see frontend/js/api.js) — without this, the browser's CORS preflight
+# rejects it since it's not one of django-cors-headers' default allowed headers.
+from corsheaders.defaults import default_headers  # noqa: E402
+
+CORS_ALLOW_HEADERS = list(default_headers) + ['ngrok-skip-browser-warning']
+
 # Payment providers — sandbox credentials, never hardcoded
 
 STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY', default='')

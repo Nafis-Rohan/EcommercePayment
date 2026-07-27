@@ -21,7 +21,6 @@ User = get_user_model()
 
 
 class FakeStripeObject(dict):
-    """Mimics stripe's StripeObject enough for our code: dict + attribute access, JSON-serializable."""
 
     def __getattr__(self, item):
         try:
@@ -46,7 +45,6 @@ def _make_order(user, product, quantity=1):
 
 
 class PaymentModelTests(TestCase):
-    """Unit test for the Payment model."""
 
     def setUp(self):
         self.user = User.objects.create_user(username='buyer', email='buyer@example.com', password='pass12345')
@@ -63,7 +61,6 @@ class PaymentModelTests(TestCase):
 
 
 class PaymentAPITests(APITestCase):
-    """API tests for payments (checkout + viewing own payments)."""
 
     def setUp(self):
         self.user = User.objects.create_user(username='buyer2', email='buyer2@example.com', password='pass12345')
@@ -105,7 +102,6 @@ class PaymentAPITests(APITestCase):
 
 
 class StripeWebhookTests(APITestCase):
-    """Webhook test cases — Stripe."""
 
     def setUp(self):
         self.user = User.objects.create_user(username='buyer3', email='buyer3@example.com', password='pass12345')
@@ -136,7 +132,7 @@ class StripeWebhookTests(APITestCase):
         self.product.refresh_from_db()
         self.assertEqual(self.payment.status, Payment.STATUS_SUCCESS)
         self.assertEqual(self.order.status, Order.STATUS_PAID)
-        self.assertEqual(self.product.stock, 1)  # 3 - 2
+        self.assertEqual(self.product.stock, 1)
 
     @patch('apps.payments.strategies.stripe_strategy.stripe.Webhook.construct_event')
     def test_webhook_bad_signature_returns_400(self, mock_construct_event):
@@ -153,7 +149,6 @@ class StripeWebhookTests(APITestCase):
 
 
 class BkashCallbackTests(APITestCase):
-    """Webhook/callback test case — bKash."""
 
     def setUp(self):
         cache.clear()
@@ -187,4 +182,4 @@ class BkashCallbackTests(APITestCase):
         self.product.refresh_from_db()
         self.assertEqual(self.payment.status, Payment.STATUS_SUCCESS)
         self.assertEqual(self.order.status, Order.STATUS_PAID)
-        self.assertEqual(self.product.stock, 3)  # 4 - 1
+        self.assertEqual(self.product.stock, 3)

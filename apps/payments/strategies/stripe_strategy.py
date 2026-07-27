@@ -10,7 +10,7 @@ class StripeStrategy(PaymentStrategy):
     def initiate(self, **kwargs):
         order = self.payment.order
         intent = stripe.PaymentIntent.create(
-            amount=int(order.total_amount * 100),  # Stripe wants the amount in cents
+            amount=int(order.total_amount * 100),
             currency='usd',
             payment_method_types=['card'],
             metadata={'order_id': str(order.id), 'payment_id': str(self.payment.id)},

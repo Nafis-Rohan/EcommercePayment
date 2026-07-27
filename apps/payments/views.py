@@ -21,8 +21,6 @@ logger = logging.getLogger(__name__)
 
 
 def _mark_failed(payment):
-    """A failed/declined payment attempt is a dead end for its order — cancel it rather
-    than leaving it stuck at 'pending' with no way to distinguish it from a fresh order."""
     payment.status = Payment.STATUS_FAILED
     payment.save(update_fields=['status'])
     order = payment.order
@@ -31,12 +29,6 @@ def _mark_failed(payment):
 
 
 def _mark_paid(payment):
-    """
-    Stock is only decremented here, on confirmed payment success — never at
-    order creation — per the spec's order flow. Returns False (payment
-    marked failed, order cancelled) if stock ran out between order creation
-    and payment, which the caller should surface to the client.
-    """
     order = payment.order
 
     try:
@@ -78,7 +70,6 @@ class PaymentDetailView(generics.RetrieveAPIView):
 
 
 class BkashPaymentStatusView(APIView):
-    """Queries bKash's own payment/status endpoint for a live status check (the 'query payment' step)."""
 
     permission_classes = [permissions.IsAuthenticated]
 

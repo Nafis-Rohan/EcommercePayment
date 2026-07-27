@@ -25,15 +25,6 @@ class OrderService:
     @classmethod
     @transaction.atomic
     def create_order(cls, user, items):
-        """
-        items: list of {'product_id': <uuid>, 'quantity': <int>}
-        Locks products in a stable order to snapshot a consistent price/stock
-        read, validates availability, and recomputes the total server-side —
-        never trusts a client-sent price. Stock is NOT decremented here: per
-        spec, stock is only reduced once payment actually succeeds (see
-        reduce_stock_for_order), so an unpaid/abandoned order never ties up
-        inventory.
-        """
         ordered_items = sorted(items, key=lambda i: str(i['product_id']))
 
         items_data = []
@@ -70,12 +61,6 @@ class OrderService:
     @classmethod
     @transaction.atomic
     def reduce_stock_for_order(cls, order):
-        """
-        Called once a payment for this order actually succeeds. Locks the
-        ordered products (same stable, sorted-by-id order as create_order,
-        to avoid deadlocking against a concurrent call) and re-checks
-        availability, since stock may have moved since the order was placed.
-        """
         items = list(order.items.all())
         product_ids = sorted({item.product_id for item in items}, key=str)
         products = {

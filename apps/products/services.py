@@ -3,7 +3,7 @@ from django.core.cache import cache
 from .models import Category
 
 CATEGORY_TREE_CACHE_KEY = 'category_tree'
-CATEGORY_TREE_CACHE_TTL = 60 * 60  # 1 hour
+CATEGORY_TREE_CACHE_TTL = 60 * 60
 
 
 class CategoryTreeService:
@@ -65,7 +65,6 @@ class CategoryTreeService:
             }
             tree.append(node)
 
-            # iterative DFS using an explicit stack instead of recursion
             stack = [(root['id'], node)]
             while stack:
                 parent_id, parent_node = stack.pop()

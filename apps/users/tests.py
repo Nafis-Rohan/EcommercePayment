@@ -9,7 +9,6 @@ User = get_user_model()
 
 
 class UserModelTests(TestCase):
-    """Unit test for the model."""
 
     def test_email_must_be_unique(self):
         User.objects.create_user(username='a', email='dup@example.com', password='pass12345')
@@ -18,7 +17,6 @@ class UserModelTests(TestCase):
 
 
 class AuthAPITests(APITestCase):
-    """API tests for authentication (register + login)."""
 
     def test_register_creates_user(self):
         data = {

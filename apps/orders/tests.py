@@ -16,7 +16,6 @@ User = get_user_model()
 
 
 class OrderModelTests(TestCase):
-    """Unit tests for the Order/Product model logic (deterministic totals + safe stock reduction)."""
 
     def setUp(self):
         self.user = User.objects.create_user(username='buyer', email='buyer@example.com', password='pass12345')
@@ -42,7 +41,6 @@ class OrderModelTests(TestCase):
 
 
 class OrderAPITests(APITestCase):
-    """API tests for orders."""
 
     def setUp(self):
         self.user = User.objects.create_user(username='buyer2', email='buyer2@example.com', password='pass12345')
@@ -81,12 +79,6 @@ class OrderAPITests(APITestCase):
 
 
 class StockConcurrencyTests(TransactionTestCase):
-    """
-    Proves the select_for_update race-safety actually works: two orders
-    competing for the last unit of stock, reduced from two threads at once.
-    Needs TransactionTestCase, not TestCase, so the two threads' transactions
-    really contend for the same row lock instead of one being rolled back.
-    """
 
     def setUp(self):
         self.category = Category.objects.create(name='Cat3', slug='cat3')

@@ -58,8 +58,6 @@ document.getElementById('pay-bkash-btn').addEventListener('click', async () => {
   });
   const data = await res.json();
   if (!res.ok) { alert('Checkout failed: ' + JSON.stringify(data)); return; }
-  // bKash's flow needs a human on their hosted page, so we hand off the whole
-  // browser tab to them; they redirect back to the backend's callback URL when done.
   window.location.href = data.bkash_url;
 });
 
@@ -79,9 +77,6 @@ document.getElementById('pay-stripe-btn').addEventListener('click', async () => 
   document.getElementById('confirm-stripe-btn').onclick = async () => {
     const msgEl = document.getElementById('stripe-message');
     msgEl.textContent = 'Processing...';
-    // This confirmCardPayment call is the real, production version of the
-    // `stripe payment_intents confirm ...` CLI command used during API-only
-    // testing — a live card field replaces the manual step entirely.
     const result = await stripe.confirmCardPayment(data.client_secret, {
       payment_method: { card: cardElement },
     });

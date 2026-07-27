@@ -1,5 +1,3 @@
-// Thin fetch wrapper: attaches the JWT, and retries once via refresh on a 401.
-
 function getAccessToken() { return localStorage.getItem('access_token'); }
 function getRefreshToken() { return localStorage.getItem('refresh_token'); }
 
@@ -35,8 +33,6 @@ async function apiFetch(path, options = {}) {
   if (!(options.body instanceof FormData)) {
     options.headers['Content-Type'] = 'application/json';
   }
-  // Bypasses ngrok's free-tier "are you sure?" interstitial page, which otherwise
-  // replaces the real JSON response for any request that looks like it's from a browser.
   options.headers['ngrok-skip-browser-warning'] = 'true';
   const token = getAccessToken();
   if (token) options.headers['Authorization'] = 'Bearer ' + token;

@@ -7,7 +7,6 @@ from .services import CATEGORY_TREE_CACHE_KEY, CategoryTreeService
 
 
 class CategoryModelTests(TestCase):
-    """Unit test for the Category model."""
 
     def test_slug_must_be_unique(self):
         Category.objects.create(name='Electronics', slug='electronics')
@@ -16,7 +15,6 @@ class CategoryModelTests(TestCase):
 
 
 class CategoryTreeServiceTests(TestCase):
-    """Unit tests for the DFS category-tree traversal + Redis caching (2.2.5)."""
 
     def setUp(self):
         cache.clear()

@@ -6,11 +6,6 @@ logger = logging.getLogger(__name__)
 
 
 def custom_exception_handler(exc, context):
-    """
-    Wraps DRF's default exception handler so every 4xx/5xx response emitted
-    by the API is also logged with the view that raised it, instead of only
-    showing up (or not) in Django's dev console.
-    """
     response = drf_exception_handler(exc, context)
     view = context.get('view')
 

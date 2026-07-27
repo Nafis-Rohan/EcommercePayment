@@ -1,7 +1,3 @@
-// Client-side cart, just localStorage — the server is the source of truth for
-// totals/stock once an order is actually created (see plan.md: totals are always
-// recomputed server-side, never trusted from the client).
-
 function getCart() {
   return JSON.parse(localStorage.getItem('cart') || '[]');
 }
